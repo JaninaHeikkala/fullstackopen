@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Persons from './components/Persons';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
-import axios from "axios";
+import { getPersons, addPerson, deletePerson, editPerson } from './utils/PersonService';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,26 +11,48 @@ const App = () => {
   const [filter, setFilter] = useState(''); 
   const [personsToShow, setPersonsToShow] = useState([...persons]);
 
+  const fetchData = async () => {
+    try {
+      const response = await getPersons();
+      const delButtonAdded = response.map((person) => ({
+        name: person.name,
+        phoneNumber: person.phoneNumber,
+        id: person.id,
+        btn: <button onClick={() => handleDeletePerson(person.id, person.name)}>delete</button>
+      }))
+      setPersons(delButtonAdded);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log(response.data)
-        setPersons(response.data)
-      })
+    fetchData();
   }, []);
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
     if (!persons.some(person => person.name === newName)) {
       const maxId = Math.max(...persons.map(person => person.id));
-      setPersons([...persons, { name: newName, phoneNumber: newPhoneNumber, id: maxId + 1 }]);
+      const newId = (maxId + 1).toString();
+      const personObject = {
+        name: newName,
+        phoneNumber: newPhoneNumber,
+        id: newId
+      }
+      const response = await addPerson(personObject);
+      setPersons([...persons, { ...response, id: newId, btn: <button onClick={() => handleDeletePerson(newId, newName)}>delete</button> }]);
       setNewName('');
       setNewPhoneNumber('');
       setFilter(filter);
     }
     else {
-      handleAlert();
+      if (window.confirm(newName + "is already added to the phonebook, replace the old phone number with a new one?")) {
+        const person = persons.find(p => p.name === newName);
+        const changedPerson = { ...person, phoneNumber: newPhoneNumber, btn: undefined };
+        const response = await editPerson(person.id, changedPerson);
+        fetchData();
+      }
     }
   };
 
@@ -56,16 +78,24 @@ const App = () => {
     updateFilter(filter);
   }, [persons]);
 
-  const updateFilter = (filter) => {
+  const updateFilter = async (filter) => {
     const filteredPersons = persons.filter(person =>
       person.name.toLowerCase().includes(filter.toLowerCase())
     );
     const filteredData = filteredPersons.map(person => ({
       name: person.name,
       phoneNumber: person.phoneNumber,
-      id: person.id
+      id: person.id,
+      btn: person.btn
     }));
     setPersonsToShow(filteredData);
+  };
+
+  const handleDeletePerson = async (id, name) => {
+    if (window.confirm("delete " + name + "?")) {
+      const response = await deletePerson(id);
+      fetchData();
+    }
   };
 
   return (
