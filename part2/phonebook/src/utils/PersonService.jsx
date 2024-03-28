@@ -17,7 +17,7 @@ const addPerson = async (personObject) => {
   return axios
     .post(baseUrl, personObject)
     .then(response => {
-      return response.data;
+      return response;
     })
     .catch(error => {
       console.error("Error adding person:", error);
@@ -37,15 +37,14 @@ const deletePerson = async (id) => {
     });
 }
 
-const editPerson = async (id, personObject) => {
+const editPerson = async (id, personObject, newName) => {
   return axios
     .put(`${baseUrl}/${id}`, personObject)
     .then(response => {
-      return response.data;
+      return response;
     })
     .catch(error => {
-      console.error("Error adding person:", error);
-      throw error;
+      return error.response;
     });
 }
 

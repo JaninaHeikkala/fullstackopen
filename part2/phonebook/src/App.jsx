@@ -3,6 +3,7 @@ import Persons from './components/Persons';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import { getPersons, addPerson, deletePerson, editPerson } from './utils/PersonService';
+import Alert from './components/Alert';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -10,6 +11,9 @@ const App = () => {
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [filter, setFilter] = useState(''); 
   const [personsToShow, setPersonsToShow] = useState([...persons]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success");
 
   const fetchData = async () => {
     try {
@@ -41,16 +45,24 @@ const App = () => {
         id: newId
       }
       const response = await addPerson(personObject);
-      setPersons([...persons, { ...response, id: newId, btn: <button onClick={() => handleDeletePerson(newId, newName)}>delete</button> }]);
+      if (response.status === 201) {
+        setPersons([...persons, { ...response.data, id: newId, btn: <button onClick={() => handleDeletePerson(newId, newName)}>delete</button> }]);
+        handleAlert("Added " + newName, "success");
+      }
       setNewName('');
       setNewPhoneNumber('');
       setFilter(filter);
     }
     else {
-      if (window.confirm(newName + "is already added to the phonebook, replace the old phone number with a new one?")) {
+      if (window.confirm(newName + " is already added to the phonebook, replace the old phone number with a new one?")) {
         const person = persons.find(p => p.name === newName);
         const changedPerson = { ...person, phoneNumber: newPhoneNumber, btn: undefined };
-        const response = await editPerson(person.id, changedPerson);
+        const response = await editPerson(person.id, changedPerson, newName);
+        if (response.status === 200) {
+          handleAlert("Changed the phone number of " + newName, "success");
+        } else if (response.status === 404) {
+          handleAlert("Information about " + newName + " has already been removed from the server", "error");
+        }
         fetchData();
       }
     }
@@ -64,8 +76,14 @@ const App = () => {
     setNewPhoneNumber(event.target.value);
   };
 
-  const handleAlert = () => {
-    window.alert(`${newName} is already added to phonebook`);
+  const handleAlert = (message, alertType) => {
+    setAlertType(alertType);
+    setAlertMessage(message);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setAlertMessage("");
+    }, 4000);
   };
 
   const handleFilterChange = (event) => {
@@ -101,6 +119,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Alert message={alertMessage} type={alertType} showAlert={showAlert}></Alert>
       <Filter filter={filter} onChange={handleFilterChange}></Filter>
       <h2>add new</h2>
       <PersonForm 
