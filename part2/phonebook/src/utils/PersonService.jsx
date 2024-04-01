@@ -1,9 +1,10 @@
 import axios from "axios";
-const baseUrl = 'http://localhost:3001/persons';
+const baseUrl = ''; //'https://fsopart3-nq7z.onrender.com';
 
 const getPersons = async () => {
+  console.log(`${baseUrl}/api/persons`);
   return axios
-    .get(baseUrl)
+    .get(`${baseUrl}/api/persons`)
     .then(response => {
       return response.data;
     })
@@ -15,7 +16,7 @@ const getPersons = async () => {
 
 const addPerson = async (personObject) => {
   return axios
-    .post(baseUrl, personObject)
+    .post(`${baseUrl}/api/persons`, personObject)
     .then(response => {
       return response;
     })
@@ -27,7 +28,7 @@ const addPerson = async (personObject) => {
 
 const deletePerson = async (id) => {
   return axios
-    .delete(`${baseUrl}/${id}`)
+    .delete(`${baseUrl}/api/persons/${id}`)
     .then(response => {
       return response.data;
     })
@@ -39,7 +40,7 @@ const deletePerson = async (id) => {
 
 const editPerson = async (id, personObject, newName) => {
   return axios
-    .put(`${baseUrl}/${id}`, personObject)
+    .put(`${baseUrl}/api/persons/${id}`, personObject)
     .then(response => {
       return response;
     })

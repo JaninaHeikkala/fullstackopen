@@ -8,7 +8,7 @@ import Alert from './components/Alert';
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
-  const [newPhoneNumber, setNewPhoneNumber] = useState('');
+  const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState(''); 
   const [personsToShow, setPersonsToShow] = useState([...persons]);
   const [showAlert, setShowAlert] = useState(false);
@@ -20,10 +20,10 @@ const App = () => {
       const response = await getPersons();
       const delButtonAdded = response.map((person) => ({
         name: person.name,
-        phoneNumber: person.phoneNumber,
+        number: person.number,
         id: person.id,
         btn: <button onClick={() => handleDeletePerson(person.id, person.name)}>delete</button>
-      }))
+      }));
       setPersons(delButtonAdded);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -37,26 +37,23 @@ const App = () => {
   const onSubmit = async (event) => {
     event.preventDefault();
     if (!persons.some(person => person.name === newName)) {
-      const maxId = Math.max(...persons.map(person => person.id));
-      const newId = (maxId + 1).toString();
       const personObject = {
         name: newName,
-        phoneNumber: newPhoneNumber,
-        id: newId
-      }
+        number: newNumber,
+      };
       const response = await addPerson(personObject);
-      if (response.status === 201) {
-        setPersons([...persons, { ...response.data, id: newId, btn: <button onClick={() => handleDeletePerson(newId, newName)}>delete</button> }]);
+      if (response.status === 200) {
+        setPersons([...persons, { ...response.data, btn: <button onClick={() => handleDeletePerson(response.data.id, newName)}>delete</button> }]);
         handleAlert("Added " + newName, "success");
       }
       setNewName('');
-      setNewPhoneNumber('');
+      setNewNumber('');
       setFilter(filter);
     }
     else {
       if (window.confirm(newName + " is already added to the phonebook, replace the old phone number with a new one?")) {
         const person = persons.find(p => p.name === newName);
-        const changedPerson = { ...person, phoneNumber: newPhoneNumber, btn: undefined };
+        const changedPerson = { ...person, number: newNumber, btn: undefined };
         const response = await editPerson(person.id, changedPerson, newName);
         if (response.status === 200) {
           handleAlert("Changed the phone number of " + newName, "success");
@@ -72,8 +69,8 @@ const App = () => {
     setNewName(event.target.value);
   };
 
-  const handlePhoneNumberChange = (event) => {
-    setNewPhoneNumber(event.target.value);
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value);
   };
 
   const handleAlert = (message, alertType) => {
@@ -102,7 +99,7 @@ const App = () => {
     );
     const filteredData = filteredPersons.map(person => ({
       name: person.name,
-      phoneNumber: person.phoneNumber,
+      number: person.number,
       id: person.id,
       btn: person.btn
     }));
@@ -126,8 +123,8 @@ const App = () => {
         onSubmit={onSubmit} 
         newName={newName} 
         handleNameChange={handleNameChange} 
-        newPhoneNumber={newPhoneNumber} 
-        handlePhoneNumberChange={handlePhoneNumberChange}
+        newNumber={newNumber} 
+        handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
       <Persons personsToShow={personsToShow}></Persons>
