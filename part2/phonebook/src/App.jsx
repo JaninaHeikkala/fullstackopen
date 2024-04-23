@@ -46,6 +46,9 @@ const App = () => {
         setPersons([...persons, { ...response.data, btn: <button onClick={() => handleDeletePerson(response.data.id, newName)}>delete</button> }]);
         handleAlert("Added " + newName, "success");
       }
+      else if (response.status === 400) {
+        handleAlert(response.data.error, "error");
+      }
       setNewName('');
       setNewNumber('');
       setFilter(filter);
@@ -59,6 +62,8 @@ const App = () => {
           handleAlert("Changed the phone number of " + newName, "success");
         } else if (response.status === 404) {
           handleAlert("Information about " + newName + " has already been removed from the server", "error");
+        } else if (response.status === 400) {
+          handleAlert(response.data.error, "error");
         }
         fetchData();
       }

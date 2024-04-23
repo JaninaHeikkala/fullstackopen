@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = ''; //'https://fsopart3-nq7z.onrender.com';
+const baseUrl = 'http://localhost:3001'; //'https://fsopart3-nq7z.onrender.com';
 
 const getPersons = async () => {
   console.log(`${baseUrl}/api/persons`);
@@ -15,15 +15,17 @@ const getPersons = async () => {
 }
 
 const addPerson = async (personObject) => {
-  return axios
-    .post(`${baseUrl}/api/persons`, personObject)
-    .then(response => {
-      return response;
-    })
-    .catch(error => {
+  try {
+    const response = await axios.post(`${baseUrl}/api/persons`, personObject);
+    return response;
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      return error.response;
+    } else {
       console.error("Error adding person:", error);
-      throw error;
-    });
+      throw new Error("Failed to add person. Please try again later.");
+    }
+  }
 }
 
 const deletePerson = async (id) => {
