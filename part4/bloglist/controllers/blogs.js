@@ -10,13 +10,20 @@ blogsRouter.get('/', (request, response) => {
 })
 
 blogsRouter.post('/', (request, response) => {
-  const blog = new Blog(request.body)
+    if (!request.body.title) return response.status(400).json({ error: 'Title not found' })
+    if (!request.body.url) return response.status(400).json({ error: 'URL not found' })
 
-  blog
-    .save()
-    .then(result => {
-      response.status(201).json(result)
-    })
+    let blogData = {
+        ...request.body,
+        likes: request.body.likes || 0
+    }
+    const blog = new Blog(blogData)
+
+    blog
+        .save()
+        .then(result => {
+            response.status(201).json(result)
+        })
 })
 
 module.exports = blogsRouter
