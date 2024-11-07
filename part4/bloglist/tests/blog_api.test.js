@@ -4,6 +4,7 @@ const assert = require('node:assert')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require("../models/user");
 
 const api = supertest(app)
 
@@ -12,13 +13,21 @@ const initialBlogs = [
         title: 'Title 1',
         author: 'Author 1',
         url: 'Url 1',
-        likes: 1
+        likes: 1,
     },
     {
         title: 'Title 2',
         author: 'Author 2',
         url: 'Url 2',
-        likes: 2
+        likes: 2,
+    },
+]
+
+const initialUser = [
+    {
+        username: 'blogsuser1',
+        name: 'blogsname1',
+        password: 'blogspassword1',
     },
 ]
 
@@ -28,6 +37,11 @@ const blogsInDb = async () => {
 }
 
 beforeEach(async () => {
+    await User.deleteMany({})
+    await api
+        .post('/api/users')
+        .send(initialUser[0])
+        .expect(201)
     await Blog.deleteMany({})
     let blogObject = new Blog(initialBlogs[0])
     await blogObject.save()
