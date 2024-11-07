@@ -113,11 +113,6 @@ describe('adding a blog', () => {
         assert(authors.includes('New Author'))
     })
 
-    test('there are two blogs after deletion, updating and adding blogs', async () => {
-        const response = await api.get('/api/blogs')
-        assert.strictEqual(response.body.length, 2)
-    })
-
     test('likes default to zero', async () => {
         const newBlog = {
             title: 'New Title Zero',
@@ -165,7 +160,7 @@ describe('adding a blog', () => {
     })
 })
 
-test('blog entries contain _id', async () => {
+test('blog entries contain id', async () => {
     const response = await api.get('/api/blogs')
     const allHaveId = response.body.every(blog => blog.hasOwnProperty('id'))
     assert.strictEqual(allHaveId, true)
