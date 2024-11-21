@@ -19,13 +19,13 @@ blogsRouter.get('/',  (request, response) => {
 })
 
 blogsRouter.post('/', async (request, response) => {
-    if (!getTokenFrom(request)) return response.status(400).json({ error: 'No token found' })
+    if (!request.token) return response.status(400).json({ error: 'No token found' })
     if (!request.body.title) return response.status(400).json({ error: 'Title not found' })
     if (!request.body.url) return response.status(400).json({ error: 'URL not found' })
 
     const body = request.body
     try {
-        const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+        const decodedToken = jwt.verify(request.token, process.env.SECRET)
         if (!decodedToken.id) {
             return response.status(401).json({error: 'token invalid'})
         }
