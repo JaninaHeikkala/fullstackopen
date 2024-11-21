@@ -23,7 +23,6 @@ blogsRouter.post('/', async (request, response) => {
     if (!request.body.title) return response.status(400).json({ error: 'Title not found' })
     if (!request.body.url) return response.status(400).json({ error: 'URL not found' })
 
-    const body = request.body
     try {
         const decodedToken = jwt.verify(request.token, process.env.SECRET)
         if (!decodedToken.id) {
@@ -49,12 +48,32 @@ blogsRouter.post('/', async (request, response) => {
     }
 })
 
-blogsRouter.delete('/:id', (request, response, next) => {
-    Blog.findByIdAndDelete(request.params.id)
-        .then(result => {
-            response.status(204).end()
-        })
-        .catch(error => next(error))
+blogsRouter.delete('/:id', async (request, response, next) => {
+    if (!request.token) return response.status(400).json({error: 'No token found'})
+
+    try {
+        const decodedToken = jwt.verify(request.token, process.env.SECRET)
+        if (!decodedToken.id) {
+            return response.status(401).json({error: 'token invalid'})
+        }
+        const user = await User.findById(decodedToken.id)
+        const blog = await Blog.findById(request.params.id)
+        if (!blog) {
+            return response.status(404).json({ error: 'blog not found' })
+        }
+
+        if ( blog.user.toString() === user.id.toString() ) {
+            await Blog.findByIdAndDelete(request.params.id)
+            user.blogs = user.blogs.filter(blogId => blogId.toString() !== blog.id.toString())
+            await user.save()
+            return response.status(204).end()
+        } else {
+            return response.status(401).json({error: 'you cannot delete blogs you dont own'})
+        }
+
+    } catch {
+        return response.status(401).json({error: 'token invalid'})
+    }
 })
 
 blogsRouter.put('/:id', (request, response, next) => {
