@@ -1,39 +1,52 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.startsWith('Bearer ')) {
+        return authorization.replace('Bearer ', '')
+    }
+    return null
+}
 
 blogsRouter.get('/',  (request, response) => {
     Blog
         .find({}).populate('user', { name: 1, username: 1, id: 1 }).then(blogs => {
             response.json(blogs)
         })
-    /*Blog
-    .find({})
-    .then(blogs => {
-      response.json(blogs)
-    })*/
 })
 
 blogsRouter.post('/', async (request, response) => {
+    if (!getTokenFrom(request)) return response.status(400).json({ error: 'No token found' })
     if (!request.body.title) return response.status(400).json({ error: 'Title not found' })
     if (!request.body.url) return response.status(400).json({ error: 'URL not found' })
 
-    const users = await User.find({})
-    const user = users[0]
+    const body = request.body
+    try {
+        const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+        if (!decodedToken.id) {
+            return response.status(401).json({error: 'token invalid'})
+        }
+        const user = await User.findById(decodedToken.id)
 
-    let blogData = {
-        ...request.body,
-        likes: request.body.likes || 0,
-        user: user.id,
+        let blogData = {
+            ...request.body,
+            likes: request.body.likes || 0,
+            user: user.id,
+        }
+        const blog = new Blog(blogData)
+
+        await blog.save()
+
+        user.blogs = user.blogs.concat(blog._id)
+        await user.save()
+
+        response.status(201).json(blog)
+    } catch {
+        return response.status(400).json({ error: 'token invalid' })
     }
-    const blog = new Blog(blogData)
-
-    await blog.save()
-
-    user.blogs = user.blogs.concat(blog._id)
-    await user.save()
-
-    response.status(201).json(blog)
 })
 
 blogsRouter.delete('/:id', (request, response, next) => {
