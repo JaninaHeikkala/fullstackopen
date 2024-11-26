@@ -24,11 +24,7 @@ blogsRouter.post('/', async (request, response) => {
     if (!request.body.url) return response.status(400).json({ error: 'URL not found' })
 
     try {
-        const decodedToken = jwt.verify(request.token, process.env.SECRET)
-        if (!decodedToken.id) {
-            return response.status(401).json({error: 'token invalid'})
-        }
-        const user = await User.findById(decodedToken.id)
+        const user = request.user
 
         let blogData = {
             ...request.body,
@@ -43,8 +39,8 @@ blogsRouter.post('/', async (request, response) => {
         await user.save()
 
         response.status(201).json(blog)
-    } catch {
-        return response.status(400).json({ error: 'token invalid' })
+    } catch (error) {
+        return response.status(500).json({ error: 'An error occurred', details: error.message });
     }
 })
 
@@ -52,11 +48,7 @@ blogsRouter.delete('/:id', async (request, response, next) => {
     if (!request.token) return response.status(400).json({error: 'No token found'})
 
     try {
-        const decodedToken = jwt.verify(request.token, process.env.SECRET)
-        if (!decodedToken.id) {
-            return response.status(401).json({error: 'token invalid'})
-        }
-        const user = await User.findById(decodedToken.id)
+        const user = request.user
         const blog = await Blog.findById(request.params.id)
         if (!blog) {
             return response.status(404).json({ error: 'blog not found' })
@@ -71,8 +63,8 @@ blogsRouter.delete('/:id', async (request, response, next) => {
             return response.status(401).json({error: 'you cannot delete blogs you dont own'})
         }
 
-    } catch {
-        return response.status(401).json({error: 'token invalid'})
+    } catch (error) {
+        return response.status(500).json({ error: 'An error occurred', details: error.message });
     }
 })
 
