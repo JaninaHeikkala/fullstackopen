@@ -19,7 +19,7 @@ blogsRouter.get('/',  (request, response) => {
 })
 
 blogsRouter.post('/', async (request, response) => {
-    if (!request.token) return response.status(400).json({ error: 'No token found' })
+    if (!request.token) return response.status(401).json({ error: 'No token found' })
     if (!request.body.title) return response.status(400).json({ error: 'Title not found' })
     if (!request.body.url) return response.status(400).json({ error: 'URL not found' })
 
@@ -45,7 +45,7 @@ blogsRouter.post('/', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response, next) => {
-    if (!request.token) return response.status(400).json({error: 'No token found'})
+    if (!request.token) return response.status(401).json({error: 'No token found'})
 
     try {
         const user = request.user

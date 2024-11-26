@@ -44,6 +44,23 @@ test('users are returned as json', async () => {
         .expect('Content-Type', /application\/json/)
 })
 
+test('login returns token', async () => {
+    const user = {
+        "username": "testusername1",
+        "password": "testpassword1"
+    }
+
+    const response = await api
+        .post('/api/login')
+        .send(user)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(typeof response.body.token, 'string', 'Token should be a string');
+    assert(response.body.token.length > 0, 'Token should not be empty')
+    assert.strictEqual(response.body.username, 'testusername1', 'Username should be the same');
+})
+
 describe('adding a user', () => {
     test('a valid user can be added', async () => {
         const newUser = {

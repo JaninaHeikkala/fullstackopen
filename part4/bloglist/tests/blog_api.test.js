@@ -31,23 +31,49 @@ const initialUser = [
     },
 ]
 
+let token = null
+
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(blog => blog.toJSON())
 }
 
+const usersInDb = async () => {
+    const users = await User.find({})
+    return users.map(user => user.toJSON())
+}
+
 beforeEach(async () => {
-    await User.deleteMany({})
-    await api
+    await User.deleteMany({});
+    await Blog.deleteMany({});
+
+    const userResponse = await api
         .post('/api/users')
         .send(initialUser[0])
-        .expect(201)
-    await Blog.deleteMany({})
-    let blogObject = new Blog(initialBlogs[0])
-    await blogObject.save()
-    blogObject = new Blog(initialBlogs[1])
-    await blogObject.save()
-})
+        .expect(201);
+
+    const user = await User.findOne({ username: initialUser[0].username });
+
+    const blogObject1 = new Blog({ ...initialBlogs[0], user: user._id });
+    const blogObject2 = new Blog({ ...initialBlogs[1], user: user._id });
+
+    await blogObject1.save();
+    await blogObject2.save();
+
+    user.blogs = [blogObject1._id, blogObject2._id];
+    await user.save();
+
+    const loginResponse = await api
+        .post('/api/login')
+        .send({
+            username: initialUser[0].username,
+            password: initialUser[0].password,
+        })
+        .expect(200);
+
+    token = loginResponse.body.token;
+});
+
 
 test('blogs are returned as json', async () => {
     await api
@@ -61,8 +87,9 @@ describe('deletion of a blog', () => {
         const blogsAtStart = await blogsInDb()
         const blogToDelete = blogsAtStart[0]
 
-        await api
+        const resp = await api
             .delete(`/api/blogs/${blogToDelete.id}`)
+            .set('Authorization', `Bearer ${token}`)
             .expect(204)
 
         const blogsAtEnd = await blogsInDb()
@@ -112,8 +139,9 @@ describe('adding a blog', () => {
             likes: 3
         }
 
-        await api
+        const blogresp = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -125,6 +153,10 @@ describe('adding a blog', () => {
         assert.strictEqual(response.body.length, initialBlogs.length + 1)
 
         assert(authors.includes('New Author'))
+
+        const users = await usersInDb()
+
+        assert.strictEqual(users[0].blogs[2].toString(), blogresp.body.id)
     })
 
     test('likes default to zero', async () => {
@@ -136,6 +168,7 @@ describe('adding a blog', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -155,6 +188,7 @@ describe('adding a blog', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(400)
             .expect('Content-Type', /application\/json/)
@@ -168,8 +202,24 @@ describe('adding a blog', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(400)
+            .expect('Content-Type', /application\/json/)
+    })
+
+    test('no token returns unauthorized', async () => {
+        const newBlog = {
+            title: 'New Title',
+            author: 'New Author',
+            url: 'New Url',
+            likes: 3
+        }
+
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(401)
             .expect('Content-Type', /application\/json/)
     })
 })
