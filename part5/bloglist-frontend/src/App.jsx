@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Alert from "./components/Alert.jsx";
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -13,6 +14,8 @@ const App = () => {
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
   const [refresh, setRefresh] = useState(false)
+  const [alertType, setAlertType] = useState('')
+  const [showAlert, setShowAlert] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -30,6 +33,16 @@ const App = () => {
     }
   }, [])
 
+  const handleAlert = (message, alertType) => {
+    setAlertType(alertType);
+    setErrorMessage(message);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setErrorMessage('');
+    }, 4000);
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -43,10 +56,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setErrorMessage('Wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      handleAlert('wrong username or password', 'error')
     }
   }
 
@@ -58,15 +68,13 @@ const App = () => {
         author,
         url
       })
+      handleAlert(`a new blog ${title}, by ${author} added`, 'success')
       setTitle('')
       setAuthor('')
       setUrl('')
       setRefresh(true)
     } catch (exception) {
-      setErrorMessage("could not create blog")
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      handleAlert('could not create blog', 'error')
     }
   }
 
@@ -76,10 +84,7 @@ const App = () => {
       setUser(null)
       window.localStorage.removeItem('loggedBlogappUser')
     } catch (exception) {
-      setErrorMessage('Could not log out')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      handleAlert('could not log out', 'error')
     }
   }
 
@@ -141,20 +146,21 @@ const App = () => {
   )
 
   return (
-      <div>
+    <div>
+      <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
       {user === null ? (loginForm()) : (
-            <div>
-              <h2>blogs</h2>
-              <div style={{display: 'flex', flexDirection: 'row'}}>
-                <p>{`logged in as ${user.username}`}</p>
-            <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
-          </div>
-          <h2>create new</h2>
-          {createNewForm()}
-          {blogs.map(blog =>
-              <Blog key={blog.id} blog={blog}/>
-          )}
+        <div>
+          <h2>blogs</h2>
+          <div style={{display: 'flex', flexDirection: 'row'}}>
+            <p>{`logged in as ${user.username}`}</p>
+        <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
         </div>
+        <h2>create new</h2>
+        {createNewForm()}
+        {blogs.map(blog =>
+            <Blog key={blog.id} blog={blog}/>
+        )}
+      </div>
       )}
     </div>
   )
