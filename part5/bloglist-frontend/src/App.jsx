@@ -3,6 +3,7 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Alert from "./components/Alert.jsx";
+import NewBlogForm from "./components/NewBlogForm.jsx";
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -16,6 +17,7 @@ const App = () => {
   const [refresh, setRefresh] = useState(false)
   const [alertType, setAlertType] = useState('')
   const [showAlert, setShowAlert] = useState(false)
+  const [newBlogFormVisible, setNewBlogFormVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -73,6 +75,7 @@ const App = () => {
       setAuthor('')
       setUrl('')
       setRefresh(true)
+      setNewBlogFormVisible(false)
     } catch (exception) {
       handleAlert('could not create blog', 'error')
     }
@@ -112,57 +115,37 @@ const App = () => {
     </form>
   )
 
-  const createNewForm = () => (
-      <form onSubmit={handleCreateBlog}>
-        <div>
-          title:
-          <input
-              type="text"
-              value={title}
-              name="Title"
-              onChange={({target}) => setTitle(target.value)}
-          />
-        </div>
-        <div>
-          author:
-          <input
-              type="text"
-              value={author}
-              name="Author"
-              onChange={({target}) => setAuthor(target.value)}
-          />
-        </div>
-        <div>
-          url:
-          <input
-              type="text"
-              value={url}
-              name="Url"
-              onChange={({target}) => setUrl(target.value)}
-          />
-        </div>
-        <button type="submit">create</button>
-      </form>
-  )
-
   return (
-    <div>
-      <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
-      {user === null ? (loginForm()) : (
-        <div>
-          <h2>blogs</h2>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
-            <p>{`logged in as ${user.username}`}</p>
-        <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
-        </div>
-        <h2>create new</h2>
-        {createNewForm()}
-        {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog}/>
-        )}
+      <div>
+          <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
+          {user === null ? (loginForm()) : (
+              <div>
+                  <h2>blogs</h2>
+                  <div style={{display: 'flex', flexDirection: 'row'}}>
+                    <p>{`logged in as ${user.username}`}</p>
+                    <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
+                  </div>
+                  <button onClick={() => setNewBlogFormVisible(true)}>new blog</button>
+                  {newBlogFormVisible && (
+                      <div>
+                          <NewBlogForm
+                              handleCreateNewBlog={handleCreateBlog}
+                              title={title}
+                              author={author}
+                              url={url}
+                              handleTitleChange={({target}) => setTitle(target.value)}
+                              handleAuthorChange={({target}) => setAuthor(target.value)}
+                              handleUrlChange={({target}) => setUrl(target.value)}
+                          />
+                          <button onClick={() => setNewBlogFormVisible(false)}>cancel</button>
+                      </div>
+                  )}
+                  {blogs.map(blog =>
+                      <Blog key={blog.id} blog={blog}/>
+                  )}
+              </div>
+          )}
       </div>
-      )}
-    </div>
   )
 }
 
