@@ -16,13 +16,24 @@ const App = () => {
     )  
   }, [])
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
   const handleLogin = async (event) => {
     event.preventDefault()
-
     try {
       const user = await loginService.login({
         username, password,
       })
+      window.localStorage.setItem(
+          'loggedBlogappUser', JSON.stringify(user)
+      )
       setUser(user)
       setUsername('')
       setPassword('')
@@ -31,6 +42,16 @@ const App = () => {
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
+    }
+  }
+
+  const handleLogout = async (event) => {
+    event.preventDefault()
+    try {
+      setUser(null)
+      window.localStorage.removeItem('loggedBlogappUser')
+    } catch (exception) {
+      setErrorMessage('Could not log out')
     }
   }
 
@@ -63,7 +84,10 @@ const App = () => {
       {user === null ? (loginForm()) : (
         <div>
           <h2>blogs</h2>
-          <p>{`logged in as ${user.username}`}</p>
+          <div style={{display: 'flex', flexDirection: 'row'}}>
+            <p>{`logged in as ${user.username}`}</p>
+            <button style={{ height: 'fit-content', padding: '3px 5px' }} onClick={handleLogout}>logout</button>
+          </div>
           {blogs.map(blog =>
               <Blog key={blog.id} blog={blog}/>
           )}
