@@ -9,12 +9,17 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
+  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
-  }, [])
+    )
+    setRefresh(false)
+  }, [refresh])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -45,6 +50,26 @@ const App = () => {
     }
   }
 
+  const handleCreateBlog = async (event) => {
+    event.preventDefault()
+    try {
+      const blog = await blogService.create({
+        title,
+        author,
+        url
+      })
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+      setRefresh(true)
+    } catch (exception) {
+      setErrorMessage("could not create blog")
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
   const handleLogout = async (event) => {
     event.preventDefault()
     try {
@@ -52,6 +77,9 @@ const App = () => {
       window.localStorage.removeItem('loggedBlogappUser')
     } catch (exception) {
       setErrorMessage('Could not log out')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
     }
   }
 
@@ -79,15 +107,50 @@ const App = () => {
     </form>
   )
 
-  return (
-    <div>
-      {user === null ? (loginForm()) : (
+  const createNewForm = () => (
+      <form onSubmit={handleCreateBlog}>
         <div>
-          <h2>blogs</h2>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
-            <p>{`logged in as ${user.username}`}</p>
-            <button style={{ height: 'fit-content', padding: '3px 5px' }} onClick={handleLogout}>logout</button>
+          title:
+          <input
+              type="text"
+              value={title}
+              name="Title"
+              onChange={({target}) => setTitle(target.value)}
+          />
+        </div>
+        <div>
+          author:
+          <input
+              type="text"
+              value={author}
+              name="Author"
+              onChange={({target}) => setAuthor(target.value)}
+          />
+        </div>
+        <div>
+          url:
+          <input
+              type="text"
+              value={url}
+              name="Url"
+              onChange={({target}) => setUrl(target.value)}
+          />
+        </div>
+        <button type="submit">create</button>
+      </form>
+  )
+
+  return (
+      <div>
+      {user === null ? (loginForm()) : (
+            <div>
+              <h2>blogs</h2>
+              <div style={{display: 'flex', flexDirection: 'row'}}>
+                <p>{`logged in as ${user.username}`}</p>
+            <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
           </div>
+          <h2>create new</h2>
+          {createNewForm()}
           {blogs.map(blog =>
               <Blog key={blog.id} blog={blog}/>
           )}
