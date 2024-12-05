@@ -11,13 +11,10 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
+
   const [refresh, setRefresh] = useState(false)
   const [alertType, setAlertType] = useState('')
   const [showAlert, setShowAlert] = useState(false)
-  const [newBlogFormVisible, setNewBlogFormVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -59,25 +56,6 @@ const App = () => {
       setPassword('')
     } catch (exception) {
       handleAlert('wrong username or password', 'error')
-    }
-  }
-
-  const handleCreateBlog = async (event) => {
-    event.preventDefault()
-    try {
-      const blog = await blogService.create({
-        title,
-        author,
-        url
-      })
-      handleAlert(`a new blog ${title}, by ${author} added`, 'success')
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      setRefresh(true)
-      setNewBlogFormVisible(false)
-    } catch (exception) {
-      handleAlert('could not create blog', 'error')
     }
   }
 
@@ -125,21 +103,13 @@ const App = () => {
                     <p>{`logged in as ${user.username}`}</p>
                     <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
                   </div>
-                  <button onClick={() => setNewBlogFormVisible(true)}>new blog</button>
-                  {newBlogFormVisible && (
-                      <div>
-                          <NewBlogForm
-                              handleCreateNewBlog={handleCreateBlog}
-                              title={title}
-                              author={author}
-                              url={url}
-                              handleTitleChange={({target}) => setTitle(target.value)}
-                              handleAuthorChange={({target}) => setAuthor(target.value)}
-                              handleUrlChange={({target}) => setUrl(target.value)}
-                          />
-                          <button onClick={() => setNewBlogFormVisible(false)}>cancel</button>
-                      </div>
-                  )}
+                  <div>
+                     {/* TODO kanske fixa så att int här finns saker ???? måst läs description noggrannare */}
+                      <NewBlogForm
+                          handleAlert={handleAlert}
+                          handleRefreshChange={setRefresh}
+                      />
+                  </div>
                   {blogs.map(blog =>
                       <Blog key={blog.id} blog={blog}/>
                   )}
