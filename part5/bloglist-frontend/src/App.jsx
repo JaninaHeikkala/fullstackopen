@@ -17,10 +17,15 @@ const App = () => {
   const [showAlert, setShowAlert] = useState(false)
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
-    setRefresh(false)
+    blogService.getAll().then(fetchedBlogs => {
+      const blogsWithDetails = fetchedBlogs.map(blog => ({
+        ...blog,
+        showDetails: false,
+      }));
+      setBlogs(blogsWithDetails);
+    });
+    console.log(blogs)
+    setRefresh(false);
   }, [refresh])
 
   useEffect(() => {
@@ -93,6 +98,12 @@ const App = () => {
     </form>
   )
 
+  const toggleShowDetails = (id) => {
+    setBlogs(blogs.map(blog =>
+        blog.id === id ? { ...blog, showDetails: !blog.showDetails } : blog
+    ));
+  };
+
   return (
       <div>
           <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
@@ -104,14 +115,13 @@ const App = () => {
                     <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
                   </div>
                   <div>
-                     {/* TODO kanske fixa så att int här finns saker ???? måst läs description noggrannare */}
                       <NewBlogForm
                           handleAlert={handleAlert}
                           handleRefreshChange={setRefresh}
                       />
                   </div>
                   {blogs.map(blog =>
-                      <Blog key={blog.id} blog={blog}/>
+                      <Blog key={blog.id} blog={blog} toggleShowDetails={toggleShowDetails}/>
                   )}
               </div>
           )}

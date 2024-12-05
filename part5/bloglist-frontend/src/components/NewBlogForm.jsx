@@ -31,7 +31,7 @@ const NewBlogForm = ({
 
     return (
         <div>
-            {!newBlogFormVisible && <button onClick={() => setNewBlogFormVisible(true)}>new blog</button>}
+            {!newBlogFormVisible && <button style={{ marginBlock: '6px' }} onClick={() => setNewBlogFormVisible(true)}>new blog</button>}
             {newBlogFormVisible ? (
                 <div>
                     <h2>create new</h2>
