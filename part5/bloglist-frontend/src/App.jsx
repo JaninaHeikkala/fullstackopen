@@ -18,10 +18,11 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(fetchedBlogs => {
-      const blogsWithDetails = fetchedBlogs.map(blog => ({
+      const blgs = fetchedBlogs.map(blog => ({
         ...blog,
       }));
-      setBlogs(blogsWithDetails);
+      blgs.sort((a, b) => b.likes - a.likes);
+      setBlogs(blgs);
     });
     setRefresh(false);
   }, [refresh])
