@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import Alert from "./components/Alert.jsx";
-import NewBlogForm from "./components/NewBlogForm.jsx";
+import Alert from './components/Alert.jsx'
+import NewBlogForm from './components/NewBlogForm.jsx'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -20,11 +20,11 @@ const App = () => {
     blogService.getAll().then(fetchedBlogs => {
       const blgs = fetchedBlogs.map(blog => ({
         ...blog,
-      }));
-      blgs.sort((a, b) => b.likes - a.likes);
-      setBlogs(blgs);
-    });
-    setRefresh(false);
+      }))
+      blgs.sort((a, b) => b.likes - a.likes)
+      setBlogs(blgs)
+    })
+    setRefresh(false)
   }, [refresh])
 
   useEffect(() => {
@@ -37,14 +37,14 @@ const App = () => {
   }, [])
 
   const handleAlert = (message, alertType) => {
-    setAlertType(alertType);
-    setErrorMessage(message);
-    setShowAlert(true);
+    setAlertType(alertType)
+    setErrorMessage(message)
+    setShowAlert(true)
     setTimeout(() => {
-      setShowAlert(false);
-      setErrorMessage('');
-    }, 4000);
-  };
+      setShowAlert(false)
+      setErrorMessage('')
+    }, 4000)
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -53,7 +53,7 @@ const App = () => {
         username, password,
       })
       window.localStorage.setItem(
-          'loggedBlogappUser', JSON.stringify(user)
+        'loggedBlogappUser', JSON.stringify(user)
       )
       setUser(user)
       setUsername('')
@@ -98,33 +98,33 @@ const App = () => {
   )
 
   return (
-      <div>
-          <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
-          {user === null ? (loginForm()) : (
-              <div>
-                  <h2>blogs</h2>
-                  <div style={{display: 'flex', flexDirection: 'row'}}>
-                    <p>{`logged in as ${user.username}`}</p>
-                    <button style={{height: 'fit-content', padding: '3px 5px'}} onClick={handleLogout}>logout</button>
-                  </div>
-                  <div>
-                      <NewBlogForm
-                          handleAlert={handleAlert}
-                          handleRefreshChange={setRefresh}
-                      />
-                  </div>
-                  {blogs.map(blog =>
-                      <Blog
-                          key={blog.id}
-                          blog={blog}
-                          handleRefreshChange={setRefresh}
-                          handleAlert={handleAlert}
-                          user={user}
-                      />
-                  )}
-              </div>
+    <div>
+      <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
+      {user === null ? (loginForm()) : (
+        <div>
+          <h2>blogs</h2>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <p>{`logged in as ${user.username}`}</p>
+            <button style={{ height: 'fit-content', padding: '3px 5px' }} onClick={handleLogout}>logout</button>
+          </div>
+          <div>
+            <NewBlogForm
+              handleAlert={handleAlert}
+              handleRefreshChange={setRefresh}
+            />
+          </div>
+          {blogs.map(blog =>
+            <Blog
+              key={blog.id}
+              blog={blog}
+              handleRefreshChange={setRefresh}
+              handleAlert={handleAlert}
+              user={user}
+            />
           )}
-      </div>
+        </div>
+      )}
+    </div>
   )
 }
 
