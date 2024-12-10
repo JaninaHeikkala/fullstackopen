@@ -25,7 +25,6 @@ blogsRouter.post('/', async (request, response) => {
 
     try {
         const user = request.user
-        console.log("USER", request.token)
 
         let blogData = {
             ...request.body,

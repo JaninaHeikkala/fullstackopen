@@ -24,6 +24,18 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
     }
   }
 
+  const handleDeleteBlog = async (event) => {
+    event.preventDefault()
+    try {
+      if (window.confirm(`delete blog ${blog.title}?`)) {
+        const deletedBlog = await blogService.remove(blog.id)
+        handleRefreshChange(true)
+      }
+    } catch (exception) {
+      handleAlert(`could not delete blog, error: ${exception}`, 'error')
+    }
+  }
+
   return (
       <div style={blogStyle}>
         {blog.title}
@@ -31,7 +43,7 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
           {showDetails ? 'hide' : 'show details'}
         </button>
         {showDetails && (
-            <div style={{ gap: '0px', marginBottom: '10px' }}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '0px', marginBottom: '10px'}}>
               {blog.url}
               <div style={{display: 'flex', flexDirection: 'row', marginBlock: '6px'}}>
                 likes {blog.likes}
@@ -43,6 +55,15 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
                 </button>
               </div>
               {blog.author}
+              {blog && user && (blog?.user?.username === user?.username) ? (
+                  <button style={{
+                    height: 'fit-content',
+                    alignItems: "center",
+                    marginLeft: '6px',
+                    maxWidth: 'fit-content',
+                  }} onClick={handleDeleteBlog}>remove blog
+                  </button>
+              ) : null}
             </div>
         )}
       </div>

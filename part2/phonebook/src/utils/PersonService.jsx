@@ -2,7 +2,6 @@ import axios from "axios";
 const baseUrl = 'http://localhost:3001'; //'https://fsopart3-nq7z.onrender.com';
 
 const getPersons = async () => {
-  console.log(`${baseUrl}/api/persons`);
   return axios
     .get(`${baseUrl}/api/persons`)
     .then(response => {
