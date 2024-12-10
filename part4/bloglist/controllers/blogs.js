@@ -25,6 +25,7 @@ blogsRouter.post('/', async (request, response) => {
 
     try {
         const user = request.user
+        console.log("USER", request.token)
 
         let blogData = {
             ...request.body,
@@ -68,21 +69,25 @@ blogsRouter.delete('/:id', async (request, response, next) => {
     }
 })
 
-blogsRouter.put('/:id', (request, response, next) => {
-    const body = request.body
+blogsRouter.put('/:id', async (request, response, next) => {
+    if (!request.token) return response.status(401).json({error: 'No token found'})
 
-    const blog = {
-        title: body.title,
-        author: body.author,
-        url: body.url,
-        likes: body.likes
+    try {
+        const body = request.body
+
+        const updatedBlog = {
+            title: body.title,
+            author: body.author,
+            url: body.url,
+            likes: body.likes,
+            user: body.user,
+        }
+
+        await Blog.findByIdAndUpdate(request.params.id, updatedBlog)
+        return response.status(204).end()
+    } catch (error) {
+        return response.status(500).json({error: 'An error occurred', details: error.message});
     }
-
-    Blog.findByIdAndUpdate(request.params.id, blog)
-        .then(updatedNote => {
-            response.json(updatedNote)
-        })
-        .catch(error => next(error))
 })
 
 module.exports = blogsRouter

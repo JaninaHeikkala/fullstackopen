@@ -20,11 +20,9 @@ const App = () => {
     blogService.getAll().then(fetchedBlogs => {
       const blogsWithDetails = fetchedBlogs.map(blog => ({
         ...blog,
-        showDetails: false,
       }));
       setBlogs(blogsWithDetails);
     });
-    console.log(blogs)
     setRefresh(false);
   }, [refresh])
 
@@ -98,12 +96,6 @@ const App = () => {
     </form>
   )
 
-  const toggleShowDetails = (id) => {
-    setBlogs(blogs.map(blog =>
-        blog.id === id ? { ...blog, showDetails: !blog.showDetails } : blog
-    ));
-  };
-
   return (
       <div>
           <Alert message={errorMessage} type={alertType} showAlert={showAlert}/>
@@ -121,7 +113,13 @@ const App = () => {
                       />
                   </div>
                   {blogs.map(blog =>
-                      <Blog key={blog.id} blog={blog} toggleShowDetails={toggleShowDetails}/>
+                      <Blog
+                          key={blog.id}
+                          blog={blog}
+                          handleRefreshChange={setRefresh}
+                          handleAlert={handleAlert}
+                          user={user}
+                      />
                   )}
               </div>
           )}
