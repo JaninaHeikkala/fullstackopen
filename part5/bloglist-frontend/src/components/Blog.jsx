@@ -26,24 +26,23 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
 
   return (
       <div style={blogStyle}>
-        {blog.title} {blog.author}
+        {blog.title}
         <button style={{margin: '6px'}} onClick={() => toggleShowDetails(blog.id)}>
           {showDetails ? 'hide' : 'show details'}
         </button>
         {showDetails && (
-            <div>
-              <p>{blog.url}</p>
-              <div style={{display: 'flex', flexDirection: 'row'}}>
-                <p>likes {blog.likes} </p>
+            <div style={{ gap: '0px', marginBottom: '10px' }}>
+              {blog.url}
+              <div style={{display: 'flex', flexDirection: 'row', marginBlock: '6px'}}>
+                likes {blog.likes}
                 <button style={{
                   height: 'fit-content',
-                  padding: '3px 5px',
                   alignItems: "center",
-                  marginTop: '10px',
                   marginLeft: '6px'
                 }} onClick={handleLikeBlog}>like
                 </button>
               </div>
+              {blog.author}
             </div>
         )}
       </div>
@@ -55,7 +54,7 @@ const blogStyle = {
   paddingLeft: 8,
   border: 'solid',
   borderWidth: 1,
-  marginBottom: 5
+  marginBottom: 5,
 }
 
 export default Blog
