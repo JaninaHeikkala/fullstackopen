@@ -37,15 +37,19 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      {blog.title}
-      <button style={{ margin: '6px' }} onClick={() => toggleShowDetails(blog.id)}>
-        {showDetails ? 'hide' : 'show details'}
-      </button>
+    <div style={blogStyle} className='blog'>
+      <div className='blog-header'>
+        {blog.title} {blog.author}
+        <button style={{ margin: '6px' }} onClick={() => toggleShowDetails(blog.id)}>
+          {showDetails ? 'hide' : 'show details'}
+        </button>
+      </div>
       {showDetails && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', marginBottom: '10px' }}>
-          {blog.url}
-          <div style={{ display: 'flex', flexDirection: 'row', marginBlock: '6px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', marginBottom: '10px' }} className='blog-details'>
+          <div className='blog-url'>
+            {blog.url}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'row', marginBlock: '6px' }} className='blog-likes'>
             likes {blog.likes}
             <button style={{
               height: 'fit-content',
@@ -54,7 +58,7 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
             }} onClick={handleLikeBlog}>like
             </button>
           </div>
-          {blog.author}
+          {user?.username}
           {blog && user && (blog?.user?.username === user?.username) ? (
             <button style={{
               height: 'fit-content',
