@@ -73,6 +73,22 @@ const App = () => {
     }
   }
 
+  const handleLikeBlog = async (event, blog) => {
+    event.preventDefault()
+    try {
+      const updatedBlog = await blogService.update({
+        title: blog.title,
+        author: blog.author,
+        url: blog.url,
+        likes: blog.likes += 1,
+        user: user.id,
+      }, blog.id)
+      setRefresh(true)
+    } catch (exception) {
+      handleAlert(`could not like blog, error: ${exception}`, 'error')
+    }
+  }
+
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
@@ -119,6 +135,7 @@ const App = () => {
               blog={blog}
               handleRefreshChange={setRefresh}
               handleAlert={handleAlert}
+              handleLikeBlog={handleLikeBlog}
               user={user}
             />
           )}

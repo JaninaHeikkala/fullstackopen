@@ -50,3 +50,30 @@ test('details click', async () => {
   expect(container.querySelector('.blog-likes')).not.toBeNull()
 
 })
+
+test('like twice', async () => {
+  const user = userEvent.setup()
+  const mockLikeHandler = vi.fn()
+  const mockAlertHandler = vi.fn()
+  const mockRefreshHandler = vi.fn()
+
+  const blog = {
+    title: 'testTitle1',
+    author: 'testAuthor1',
+    url: 'testUrl1',
+    likes: 0,
+    user: 'testUser1',
+  }
+
+  const { container } = render(<Blog blog={blog} handleAlert={mockAlertHandler} handleRefreshChange={mockRefreshHandler} handleLikeBlog={mockLikeHandler}/>)
+
+  const button = screen.getByText('show details')
+  await user.click(button)
+
+  const likeButton = screen.getByText('like')
+  await user.click(likeButton)
+  await user.click(likeButton)
+
+  expect(mockLikeHandler.mock.calls).toHaveLength(2)
+
+})

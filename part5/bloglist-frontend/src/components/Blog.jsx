@@ -1,27 +1,11 @@
 import blogService from '../services/blogs.js'
 import { useState } from 'react'
 
-const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
+const Blog = ({ blog, handleRefreshChange, handleAlert, handleLikeBlog, user }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   const toggleShowDetails = () => {
     setShowDetails(!showDetails)
-  }
-
-  const handleLikeBlog = async (event) => {
-    event.preventDefault()
-    try {
-      const updatedBlog = await blogService.update({
-        title: blog.title,
-        author: blog.author,
-        url: blog.url,
-        likes: blog.likes += 1,
-        user: user.id,
-      }, blog.id)
-      handleRefreshChange(true)
-    } catch (exception) {
-      handleAlert(`could not like blog, error: ${exception}`, 'error')
-    }
   }
 
   const handleDeleteBlog = async (event) => {
@@ -55,7 +39,7 @@ const Blog = ({ blog, handleRefreshChange, handleAlert, user }) => {
               height: 'fit-content',
               alignItems: 'center',
               marginLeft: '6px'
-            }} onClick={handleLikeBlog}>like
+            }} onClick={(event) => handleLikeBlog(event, blog)}>like
             </button>
           </div>
           {user?.username}
