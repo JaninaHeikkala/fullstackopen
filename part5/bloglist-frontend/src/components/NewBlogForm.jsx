@@ -4,6 +4,11 @@ import blogService from '../services/blogs.js'
 const NewBlogForm = ({
   handleAlert,
   handleRefreshChange,
+  handleCreateBlog = async (blogData) => {
+    const blog = await blogService.create(blogData)
+    handleAlert(`a new blog ${blogData.title}, by ${blogData.author} added`, 'success')
+    handleRefreshChange(true)
+  },
 }) => {
 
   const [title, setTitle] = useState('')
@@ -11,19 +16,13 @@ const NewBlogForm = ({
   const [url, setUrl] = useState('')
   const [newBlogFormVisible, setNewBlogFormVisible] = useState(false)
 
-  const handleCreateBlog = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      const blog = await blogService.create({
-        title,
-        author,
-        url
-      })
-      handleAlert(`a new blog ${title}, by ${author} added`, 'success')
+      await handleCreateBlog({ title, author, url })
       setTitle('')
       setAuthor('')
       setUrl('')
-      handleRefreshChange(true)
     } catch (exception) {
       handleAlert('could not create blog', 'error')
     }
@@ -35,7 +34,7 @@ const NewBlogForm = ({
       {newBlogFormVisible ? (
         <div>
           <h2>create new</h2>
-          <form onSubmit={handleCreateBlog}>
+          <form onSubmit={handleSubmit}>
             <div>
               title:
               <input
@@ -43,6 +42,7 @@ const NewBlogForm = ({
                 value={title}
                 name="Title"
                 onChange={({ target }) => setTitle(target.value)}
+                placeholder='title'
               />
             </div>
             <div>
@@ -52,6 +52,7 @@ const NewBlogForm = ({
                 value={author}
                 name="Author"
                 onChange={({ target }) => setAuthor(target.value)}
+                placeholder='author'
               />
             </div>
             <div>
@@ -61,6 +62,7 @@ const NewBlogForm = ({
                 value={url}
                 name="Url"
                 onChange={({ target }) => setUrl(target.value)}
+                placeholder='url'
               />
             </div>
             <button type="submit">create</button>
